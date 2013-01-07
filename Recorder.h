@@ -6,8 +6,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#include <lame/lame.h>
-#include <AudioToolbox/AudioToolbox.h>
+#import <lame/lame.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 typedef struct MyRecorder {
 	AudioQueueRef				queue;
