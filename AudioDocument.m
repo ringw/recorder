@@ -92,12 +92,12 @@
 }
 
 - (void)_updateAVTime {
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    while (recording) {
-        audioView.position = audioView.length = [recorder pcmData].length / 4 / 44100.;
-        usleep(50000);
+    @autoreleasepool {
+        while (recording) {
+            audioView.position = audioView.length = [recorder pcmData].length / 4 / 44100.;
+            usleep(50000);
+        }
     }
-    [pool drain];
 }
 
 - (IBAction)recordClicked:(NSButton *)sender {

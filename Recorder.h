@@ -32,8 +32,8 @@
 @property (nonatomic, readwrite) Boolean verbose;
 
 @property (readonly) NSMutableData *pcmData;
-@property (readonly) NSMutableData *lameData;
-@property (assign) id delegate;
+@property (weak, readonly) NSMutableData *lameData;
+@property (weak) id delegate;
 
 - (void)start;
 - (void)stop;

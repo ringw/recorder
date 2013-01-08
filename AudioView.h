@@ -27,6 +27,6 @@
 @property (assign) double position;
 @property (assign) double length;
 @property (assign, getter=isRecording, setter=setIsRecording:) BOOL recording;
-@property (retain) IBOutlet AudioVolumeView *volumeView;
+@property (strong) IBOutlet AudioVolumeView *volumeView;
 - (void)displayPcmSamples: (void *)samples count: (long)count startTime: (double)start endTime: (double)end;
 @end

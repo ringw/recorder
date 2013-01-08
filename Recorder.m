@@ -49,7 +49,7 @@ static int MyComputeRecordBufferSize(const AudioStreamBasicDescription *format, 
 // AudioQueue callback function, called when a property changes.
 static void MyPropertyListener(void *userData, AudioQueueRef queue, AudioQueuePropertyID propertyID)
 {
-	Recorder *aqr = (Recorder *)userData;
+	Recorder *aqr = (__bridge Recorder *)userData;
 	if (propertyID == kAudioQueueProperty_IsRunning)
 		aqr.queueStartStopTime = CFAbsoluteTimeGetCurrent();
 }
@@ -63,7 +63,7 @@ static void MyInputBufferHandler(	void *                          inUserData,
                                  UInt32							inNumPackets,
                                  const AudioStreamPacketDescription *inPacketDesc)
 {
-	Recorder *aqr = (Recorder *)inUserData;
+	Recorder *aqr = (__bridge Recorder *)inUserData;
     
 	{
 		if (aqr.verbose) {
@@ -148,7 +148,7 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
     if (AudioQueueNewInput(
                            &recordFormat,
                            MyInputBufferHandler,
-                           (void *)self /* userData */,
+                           (__bridge void *)self /* userData */,
                            NULL /* run loop */, NULL /* run loop mode */,
                            0 /* flags */, &(_queue)) != 0) {
         fprintf(stderr, "AudioQueueNewInput failed");
