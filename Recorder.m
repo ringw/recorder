@@ -65,7 +65,7 @@ static void MyInputBufferHandler(void *                          inUserData,
 {
 	Recorder *aqr = (__bridge Recorder *)inUserData;
     
-	{
+	@autoreleasepool {
 		if (aqr.verbose) {
 			fprintf(stderr, "buf data %p, 0x%x bytes, 0x%x packets\n", inBuffer->mAudioData,
                     (int)inBuffer->mAudioDataByteSize, (int)inNumPackets);
