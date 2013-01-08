@@ -56,7 +56,7 @@ static void MyPropertyListener(void *userData, AudioQueueRef queue, AudioQueuePr
 
 // ____________________________________________________________________________________
 // AudioQueue callback function, called when an input buffers has been filled.
-static void MyInputBufferHandler(	void *                          inUserData,
+static void MyInputBufferHandler(void *                          inUserData,
                                  AudioQueueRef                   inAQ,
                                  AudioQueueBufferRef             inBuffer,
                                  const AudioTimeStamp *          inStartTime,
@@ -145,8 +145,7 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
     
     
     // create the queue
-    if (AudioQueueNewInput(
-                           &recordFormat,
+    if (AudioQueueNewInput(&recordFormat,
                            MyInputBufferHandler,
                            (__bridge void *)self /* userData */,
                            NULL /* run loop */, NULL /* run loop mode */,
