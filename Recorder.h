@@ -23,6 +23,8 @@
     //AudioQueueRef aq;
 }
 
+@property (nonatomic, readonly) AudioStreamBasicDescription recordingFormat;
+
 @property (nonatomic, readwrite) AudioQueueRef queue;
 
 @property (nonatomic, readwrite) CFAbsoluteTime queueStartStopTime;
@@ -34,6 +36,9 @@
 @property (readonly) NSMutableData *pcmData;
 @property (weak, readonly) NSMutableData *lameData;
 @property (weak) id delegate;
+
+- (instancetype)init;
+- (instancetype)initWithRecordingFormat:(AudioStreamBasicDescription *)recordingFormatRef;
 
 - (void)start;
 - (void)stop;

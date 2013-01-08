@@ -75,9 +75,12 @@ static void MyInputBufferHandler(void *                          inUserData,
             long originalPcmLength = aqr.pcmData.length;
             [aqr.pcmData appendBytes: inBuffer->mAudioData length: inBuffer->mAudioDataByteSize];
 			aqr.recordPacket += inNumPackets;
-            [aqr.delegate recordedPcmSamples:inBuffer->mAudioData count:inBuffer->mAudioDataByteSize/4
-                                        start:(double)originalPcmLength / (4 * 44100.)
-                                          end:(double)aqr.pcmData.length / (4 * 44100.)];
+			
+			UInt32 bytesPerPacket = aqr.recordingFormat.mBytesPerPacket;
+			Float64 sampleRate = aqr.recordingFormat.mSampleRate;
+            [aqr.delegate recordedPcmSamples:inBuffer->mAudioData count:inBuffer->mAudioDataByteSize/bytesPerPacket
+									   start:(double)originalPcmLength / (bytesPerPacket * sampleRate)
+										 end:(double)aqr.pcmData.length / (bytesPerPacket * sampleRate)];
 		}
         
 		// if we're not stopping, re-enqueue the buffer so that it gets filled again
@@ -115,37 +118,41 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
 }
 
 - (instancetype)init {
+	return [self initWithRecordingFormat:NULL];
+}
+
+- (instancetype)initWithRecordingFormat:(AudioStreamBasicDescription *)recordingFormatRef {
     self = [super init];
     if (self) {
         _pcmData = [NSMutableData new];
+		
+		if (recordingFormatRef == NULL) {
+			// adapt record format to hardware and apply defaults
+			//if (_recordingFormat.mSampleRate == 0.)
+			_recordingFormat.mSampleRate = 44100;
+			
+			//if (_recordingFormat.mChannelsPerFrame == 0)
+			_recordingFormat.mChannelsPerFrame = 2;
+			
+			_recordingFormat.mFormatID = kAudioFormatLinearPCM;
+			if (_recordingFormat.mFormatID == 0 || _recordingFormat.mFormatID == kAudioFormatLinearPCM) {
+				// default to PCM, 16 bit int
+				_recordingFormat.mFormatID = kAudioFormatLinearPCM;
+				_recordingFormat.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+				_recordingFormat.mBitsPerChannel = 16;
+				_recordingFormat.mBytesPerPacket = _recordingFormat.mBytesPerFrame =
+				(_recordingFormat.mBitsPerChannel / CHAR_BIT) * _recordingFormat.mChannelsPerFrame;
+				_recordingFormat.mFramesPerPacket = 1;
+				_recordingFormat.mReserved = 0;
+			}
+		}
+		else {
+			_recordingFormat = *recordingFormatRef;
+		}
     }
     
-    int i, bufferByteSize;
-	AudioStreamBasicDescription recordFormat;
-	UInt32 size;
-	
-	// adapt record format to hardware and apply defaults
-	//if (recordFormat.mSampleRate == 0.)
-	recordFormat.mSampleRate = 44100;
-    
-	//if (recordFormat.mChannelsPerFrame == 0)
-    recordFormat.mChannelsPerFrame = 2;
-	
-    recordFormat.mFormatID = kAudioFormatLinearPCM;
-	if (recordFormat.mFormatID == 0 || recordFormat.mFormatID == kAudioFormatLinearPCM) {
-		// default to PCM, 16 bit int
-		recordFormat.mFormatID = kAudioFormatLinearPCM;
-		recordFormat.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
-		recordFormat.mBitsPerChannel = 16;
-		recordFormat.mBytesPerPacket = recordFormat.mBytesPerFrame =
-        (recordFormat.mBitsPerChannel / 8) * recordFormat.mChannelsPerFrame;
-		recordFormat.mFramesPerPacket = 1;
-		recordFormat.mReserved = 0;
-	}
-    
-    
     // create the queue
-    if (AudioQueueNewInput(&recordFormat,
+    if (AudioQueueNewInput(&_recordingFormat,
                            MyInputBufferHandler,
                            (__bridge void *)self /* userData */,
                            NULL /* run loop */, NULL /* run loop mode */,
@@ -156,14 +163,14 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
     
     // get the record format back from the queue's audio converter --
     // the file may require a more specific stream description than was necessary to create the encoder.
-    size = sizeof(recordFormat);
+    UInt32 recordingFormatSize = sizeof(_recordingFormat);
     if (AudioQueueGetProperty(_queue, kAudioConverterCurrentOutputStreamDescription,
-                              &recordFormat, &size) != 0)
+                              &_recordingFormat, &recordingFormatSize) != 0)
         fprintf(stderr, "couldn't get queue's format");
     
     // allocate and enqueue buffers
-    bufferByteSize = MyComputeRecordBufferSize(&recordFormat, _queue, 0.01);
-    for (i = 0; i < kNumberRecordBuffers; ++i) {
+    int bufferByteSize = MyComputeRecordBufferSize(&_recordingFormat, _queue, 0.01);
+    for (int i = 0; i < kNumberRecordBuffers; ++i) {
         AudioQueueBufferRef buffer;
         if (AudioQueueAllocateBuffer(_queue, bufferByteSize, &buffer) != 0)
             fprintf(stderr, "AudioQueueAllocateBuffer failed");
@@ -189,7 +196,7 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
 - (NSData *)lameData {
     lame_flags = lame_init();
     lame_set_num_samples(lame_flags, _pcmData.length/4);
-    lame_set_in_samplerate(lame_flags, 44100);
+    lame_set_in_samplerate(lame_flags, _recordingFormat.mSampleRate);
     lame_set_num_samples(lame_flags, 2);
     lame_set_VBR(lame_flags, vbr_mtrh);
     lame_set_VBR_q(lame_flags, 0);
