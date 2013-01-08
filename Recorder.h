@@ -35,7 +35,14 @@ typedef struct MyRecorder {
     MyRecorder aqr;
     id delegate;
 }
+
 @property (readonly) NSMutableData *pcmData;
 @property (readonly) NSMutableData *lameData;
 @property (assign) id delegate;
+
+- (void)start;
+- (void)stop;
+
+- (void)writeTagsFid:(FILE *)fid;
+
 @end

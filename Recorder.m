@@ -214,7 +214,7 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
     }
     result += lame_encode_flush(lame_flags, mp3buf, mp3len);
     const int lametag_size = 2880;
-    char *lametag = malloc(lametag_size);
+    unsigned char *lametag = malloc(lametag_size);
     size_t taglen = lame_get_lametag_frame(lame_flags, lametag, lametag_size);
     if (taglen > 0) bcopy(lametag, mp3buf, taglen);
     return [NSData dataWithBytesNoCopy:mp3buf length:result freeWhenDone:YES];
