@@ -94,6 +94,12 @@
 			children = (
 				256AC3D80F4B6AC300CF3369 /* RecorderAppDelegate.h */,
 				256AC3D90F4B6AC300CF3369 /* RecorderAppDelegate.m */,
+				37A9689014A90065000B4D1D /* AudioDocument.h */,
+				37A9689114A90065000B4D1D /* AudioDocument.m */,
+				3771E4E51485960D00739DAF /* AudioView.h */,
+				3771E4E61485960D00739DAF /* AudioView.m */,
+				3771E4E81485A12C00739DAF /* Recorder.h */,
+				3771E4E91485A12C00739DAF /* Recorder.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -135,13 +141,6 @@
 		29B97314FDCFA39411CA2CEA /* Recorder */ = {
 			isa = PBXGroup;
 			children = (
-				37A9689014A90065000B4D1D /* AudioDocument.h */,
-				37A9689114A90065000B4D1D /* AudioDocument.m */,
-				37A9689214A90065000B4D1D /* AudioDocument.xib */,
-				3771E4E51485960D00739DAF /* AudioView.h */,
-				3771E4E61485960D00739DAF /* AudioView.m */,
-				3771E4E81485A12C00739DAF /* Recorder.h */,
-				3771E4E91485A12C00739DAF /* Recorder.m */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -166,6 +165,7 @@
 				8D1107310486CEB800E47090 /* Recorder-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
+				37A9689214A90065000B4D1D /* AudioDocument.xib */,
 				37A9688B14A8FC67000B4D1D /* record.png */,
 				37A9688E14A8FD37000B4D1D /* pause.png */,
 			);
