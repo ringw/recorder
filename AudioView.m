@@ -14,17 +14,25 @@ const double AUDIO_VIEW_PREVIEW_SIZE = 10.f;
 - (instancetype)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+		CGColorRef mainBackgroundColor = CGColorCreateGenericRGB(1, 1, 1, 1);
+		CGColorRef peakLayerBackgroundColor = CGColorCreateGenericRGB(1, 0, 0, 1);
+		CGColorRef volumeLayerBackgroundColor = CGColorCreateGenericRGB(1, 0, 0, 1);
+		
         self.wantsLayer = YES;
         self.layer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
-        self.layer.backgroundColor = CGColorCreateGenericRGB(1, 1, 1, 1);
+        self.layer.backgroundColor = mainBackgroundColor;
         peakLayer = [CALayer new];
         peakLayer.frame = CGRectMake(1, 0, 2, self.layer.bounds.size.height);
-        peakLayer.backgroundColor = CGColorCreateGenericRGB(1, 0, 0, 1);
+        peakLayer.backgroundColor = peakLayerBackgroundColor;
         volumeLayer = [CALayer new];
         volumeLayer.frame = CGRectMake(0, 0, 1, self.layer.bounds.size.height);
-        volumeLayer.backgroundColor = CGColorCreateGenericRGB(0, 0, 1, 1);
+        volumeLayer.backgroundColor = volumeLayerBackgroundColor;
         [self.layer addSublayer: peakLayer];
         [self.layer addSublayer: volumeLayer];
+		
+		CFRelease(mainBackgroundColor);
+		CFRelease(peakLayerBackgroundColor);
+		CFRelease(volumeLayerBackgroundColor);
     }
     return self;
 }
@@ -49,12 +57,18 @@ const double AUDIO_VIEW_PREVIEW_SIZE = 10.f;
 - (instancetype)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+		CGColorRef mainBackgroundColor = CGColorCreateGenericRGB(1, 1, 1, 1);
+		CGColorRef progressLayerBackgroundColor = CGColorCreateGenericRGB(1, .1, .1, 1);
+
         progressLayer = [[CALayer alloc] init];
-        progressLayer.backgroundColor = CGColorCreateGenericRGB(1, .1, .1, 1);
+        progressLayer.backgroundColor = progressLayerBackgroundColor;
         self.wantsLayer = YES;
         progressLayer.frame = CGRectMake(0, 0, 1, self.layer.bounds.size.height);
         [self.layer addSublayer: progressLayer];
-        self.layer.backgroundColor = CGColorCreateGenericRGB(1, 1, 1, 1);
+        self.layer.backgroundColor = mainBackgroundColor;
+		
+		CFRelease(mainBackgroundColor);
+		CFRelease(progressLayerBackgroundColor);
     }
     
     return self;
