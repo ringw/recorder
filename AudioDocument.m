@@ -26,7 +26,7 @@
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
 {
-    NSData *pcm = [recorder valueForKey: @"wavData"];
+    NSData *pcm = [recorder pcmData];
     if (pcm) {
         if ([typeName isEqualToString:@"com.microsoft.waveform-audio"]) {
             NSMutableData *wav = [NSMutableData dataWithBytes:"\x52\x49\x46\x46\x00\x00\x00\x00\x57\x41\x56\x45\x66\x6d\x74\x20\x10\x00\x00\x00\x01\x00\x02\x00\x44\xac\x00\x00\x10\xb1\x02\x00\x04\x00\x10\x00\x64\x61\x74\x61" length:40];

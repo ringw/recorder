@@ -12,8 +12,6 @@
 #define kNumberRecordBuffers	3
 
 @implementation Recorder
-@synthesize pcmData = wavData;
-@synthesize delegate;
 
 // ____________________________________________________________________________________
 // Determine the size, in bytes, of a buffer necessary to represent the supplied number
@@ -51,9 +49,9 @@ static int MyComputeRecordBufferSize(const AudioStreamBasicDescription *format, 
 // AudioQueue callback function, called when a property changes.
 static void MyPropertyListener(void *userData, AudioQueueRef queue, AudioQueuePropertyID propertyID)
 {
-	MyRecorder *aqr = (MyRecorder *)userData;
+	Recorder *aqr = (Recorder *)userData;
 	if (propertyID == kAudioQueueProperty_IsRunning)
-		aqr->queueStartStopTime = CFAbsoluteTimeGetCurrent();
+		aqr.queueStartStopTime = CFAbsoluteTimeGetCurrent();
 }
 
 // ____________________________________________________________________________________
@@ -65,25 +63,25 @@ static void MyInputBufferHandler(	void *                          inUserData,
                                  UInt32							inNumPackets,
                                  const AudioStreamPacketDescription *inPacketDesc)
 {
-	MyRecorder *aqr = (MyRecorder *)inUserData;
+	Recorder *aqr = (Recorder *)inUserData;
     
 	{
-		if (aqr->verbose) {
+		if (aqr.verbose) {
 			fprintf(stderr, "buf data %p, 0x%x bytes, 0x%x packets\n", inBuffer->mAudioData,
                     (int)inBuffer->mAudioDataByteSize, (int)inNumPackets);
 		}
 		
 		if (inNumPackets > 0) {
-            long originalPcmLength = aqr->data.length;
-            [aqr->data appendBytes: inBuffer->mAudioData length: inBuffer->mAudioDataByteSize];
-			aqr->recordPacket += inNumPackets;
-            [aqr->delegate recordedPcmSamples:inBuffer->mAudioData count:inBuffer->mAudioDataByteSize/4
+            long originalPcmLength = aqr.pcmData.length;
+            [aqr.pcmData appendBytes: inBuffer->mAudioData length: inBuffer->mAudioDataByteSize];
+			aqr.recordPacket += inNumPackets;
+            [aqr.delegate recordedPcmSamples:inBuffer->mAudioData count:inBuffer->mAudioDataByteSize/4
                                         start:(double)originalPcmLength / (4 * 44100.)
-                                          end:(double)aqr->data.length / (4 * 44100.)];
+                                          end:(double)aqr.pcmData.length / (4 * 44100.)];
 		}
         
 		// if we're not stopping, re-enqueue the buffer so that it gets filled again
-		if (aqr->running)
+		if (aqr.running)
 			if (AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, NULL) != 0)
                 fprintf(stderr, "AudioQueueEnqueueBuffer failed");
 	} 
@@ -119,19 +117,13 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
 - (instancetype)init {
     self = [super init];
     if (self) {
-        wavData = [NSMutableData new];
+        _pcmData = [NSMutableData new];
     }
     
     int i, bufferByteSize;
 	AudioStreamBasicDescription recordFormat;
 	UInt32 size;
 	
-	// fill structures with 0/NULL
-	memset(&recordFormat, 0, sizeof(recordFormat));
-	memset(&aqr, 0, sizeof(aqr));
-
-    aqr.data = wavData;
-    
 	// adapt record format to hardware and apply defaults
 	//if (recordFormat.mSampleRate == 0.)
 	recordFormat.mSampleRate = 44100;
@@ -156,25 +148,27 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
     if (AudioQueueNewInput(
                            &recordFormat,
                            MyInputBufferHandler,
-                           &aqr /* userData */,
+                           (void *)self /* userData */,
                            NULL /* run loop */, NULL /* run loop mode */,
-                           0 /* flags */, &aqr.queue) != 0)
+                           0 /* flags */, &(_queue)) != 0) {
         fprintf(stderr, "AudioQueueNewInput failed");
+		return nil;
+	}
     
     // get the record format back from the queue's audio converter --
     // the file may require a more specific stream description than was necessary to create the encoder.
     size = sizeof(recordFormat);
-    if (AudioQueueGetProperty(aqr.queue, kAudioConverterCurrentOutputStreamDescription,
+    if (AudioQueueGetProperty(_queue, kAudioConverterCurrentOutputStreamDescription,
                               &recordFormat, &size) != 0)
         fprintf(stderr, "couldn't get queue's format");
     
     // allocate and enqueue buffers
-    bufferByteSize = MyComputeRecordBufferSize(&recordFormat, aqr.queue, 0.01);
+    bufferByteSize = MyComputeRecordBufferSize(&recordFormat, _queue, 0.01);
     for (i = 0; i < kNumberRecordBuffers; ++i) {
         AudioQueueBufferRef buffer;
-        if (AudioQueueAllocateBuffer(aqr.queue, bufferByteSize, &buffer) != 0)
+        if (AudioQueueAllocateBuffer(_queue, bufferByteSize, &buffer) != 0)
             fprintf(stderr, "AudioQueueAllocateBuffer failed");
-        if (AudioQueueEnqueueBuffer(aqr.queue, buffer, 0, NULL) != 0)
+        if (AudioQueueEnqueueBuffer(_queue, buffer, 0, NULL) != 0)
             fprintf(stderr, "AudioQueueEnqueueBuffer failed");
     }
     
@@ -183,20 +177,19 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
 
 - (void)start {
     NSLog(@"start");
-    aqr.delegate = delegate;
-    aqr.running = TRUE;
-    if (AudioQueueStart(aqr.queue, NULL) != 0)
+    self.running = TRUE;
+    if (AudioQueueStart(_queue, NULL) != 0)
         fprintf(stderr, "AudioQueueStart failed");
 }
 - (void)stop {
-    aqr.running = FALSE;
-    if (AudioQueueStop(aqr.queue, TRUE) != 0)
+    self.running = FALSE;
+    if (AudioQueueStop(_queue, TRUE) != 0)
         fprintf(stderr, "AudioQueueStop failed");
 }
 
 - (NSData *)lameData {
     lame_flags = lame_init();
-    lame_set_num_samples(lame_flags, wavData.length/4);
+    lame_set_num_samples(lame_flags, _pcmData.length/4);
     lame_set_in_samplerate(lame_flags, 44100);
     lame_set_num_samples(lame_flags, 2);
     lame_set_VBR(lame_flags, vbr_mtrh);
@@ -205,9 +198,9 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
     lame_set_bWriteVbrTag(lame_flags, true);
     if (lame_init_params(lame_flags) == -1)
         NSLog(@"<Error> in lame");
-    int mp3len = (int)(wavData.length*1.25/2) + 7200;
+    int mp3len = (int)(_pcmData.length*1.25/2) + 7200;
     unsigned char *mp3buf = malloc(mp3len);
-    int result = lame_encode_buffer_interleaved(lame_flags, (short*)wavData.bytes, wavData.length/4, mp3buf, mp3len);
+    int result = lame_encode_buffer_interleaved(lame_flags, (short*)_pcmData.bytes, _pcmData.length/4, mp3buf, mp3len);
     if (result <= 0) {
         NSLog(@"<Error> from lame: %d", result);
         return nil;

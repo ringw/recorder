@@ -9,22 +9,11 @@
 #import <lame/lame.h>
 #import <AudioToolbox/AudioToolbox.h>
 
-typedef struct MyRecorder {
-	AudioQueueRef				queue;
-	
-	CFAbsoluteTime				queueStartStopTime;
-	AudioFileID					recordFile;
-	SInt64						recordPacket; // current packet number in record file
-	Boolean						running;
-	Boolean						verbose;
-    NSMutableData *data;
-    id delegate;
-} MyRecorder;
-
 @interface Recorder : NSObject {
     //MTCoreAudioDevice *inputDevice;
-    lame_global_flags *lame_flags;
-    NSMutableData *wavData;
+	
+    lame_global_flags *			lame_flags;
+	
     //int STOP;
     //ALCdevice *device;
     /*AVCaptureSession *session;
@@ -32,9 +21,15 @@ typedef struct MyRecorder {
     AVCaptureAudioPreviewOutput *prevout;
     AVCaptureDevice *device;*/
     //AudioQueueRef aq;
-    MyRecorder aqr;
-    id delegate;
 }
+
+@property (nonatomic, readwrite) AudioQueueRef queue;
+
+@property (nonatomic, readwrite) CFAbsoluteTime queueStartStopTime;
+@property (nonatomic, readwrite) AudioFileID recordFile;
+@property (nonatomic, readwrite) SInt64 recordPacket; // current packet number in record file
+@property (nonatomic, readwrite) Boolean running;
+@property (nonatomic, readwrite) Boolean verbose;
 
 @property (readonly) NSMutableData *pcmData;
 @property (readonly) NSMutableData *lameData;
