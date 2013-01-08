@@ -116,7 +116,7 @@ OSStatus	MyGetDefaultInputDeviceSampleRate(Float64 *outSampleRate)
 	return err;
 }
 
-- init {
+- (instancetype)init {
     self = [super init];
     if (self) {
         wavData = [NSMutableData new];

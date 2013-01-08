@@ -10,7 +10,7 @@
 @implementation AudioDocument
 @synthesize audioView, recordButton;
 
-- (id)init
+- (instancetype)init
 {
     self = [super init];
     if (self) {

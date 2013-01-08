@@ -11,7 +11,7 @@ const double AUDIO_VIEW_PREVIEW_SIZE = 10.f;
 
 @implementation AudioVolumeView
 @dynamic volume, peakVolume;
-- (id)initWithFrame:(NSRect)frame {
+- (instancetype)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         self.wantsLayer = YES;
@@ -46,7 +46,7 @@ const double AUDIO_VIEW_PREVIEW_SIZE = 10.f;
 @synthesize position, length, volumeView;
 @dynamic recording;
 
-- (id)initWithFrame:(NSRect)frame {
+- (instancetype)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         progressLayer = [[CALayer alloc] init];
