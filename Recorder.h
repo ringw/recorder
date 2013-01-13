@@ -6,36 +6,43 @@
 //
 
 #import <Foundation/Foundation.h>
-#include <lame/lame.h>
-#include <AudioToolbox/AudioToolbox.h>
-
-typedef struct MyRecorder {
-	AudioQueueRef				queue;
-	
-	CFAbsoluteTime				queueStartStopTime;
-	AudioFileID					recordFile;
-	SInt64						recordPacket; // current packet number in record file
-	Boolean						running;
-	Boolean						verbose;
-    NSMutableData *data;
-    id delegate;
-} MyRecorder;
+#import <lame/lame.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 @interface Recorder : NSObject {
-    //MTCoreAudioDevice *inputDevice;
-    lame_global_flags *lame_flags;
-    NSMutableData *wavData;
-    //int STOP;
-    //ALCdevice *device;
-    /*AVCaptureSession *session;
-    AVCaptureAudioDataOutput *dataout;
-    AVCaptureAudioPreviewOutput *prevout;
-    AVCaptureDevice *device;*/
-    //AudioQueueRef aq;
-    MyRecorder aqr;
-    id delegate;
+	//MTCoreAudioDevice *inputDevice;
+	
+	lame_global_flags *			lame_flags;
+	
+	//int STOP;
+	//ALCdevice *device;
+	/*AVCaptureSession *session;
+	AVCaptureAudioDataOutput *dataout;
+	AVCaptureAudioPreviewOutput *prevout;
+	AVCaptureDevice *device;*/
+	//AudioQueueRef aq;
 }
+
+@property (nonatomic, readonly) AudioStreamBasicDescription recordingFormat;
+
+@property (nonatomic, readwrite) AudioQueueRef queue;
+
+@property (nonatomic, readwrite) CFAbsoluteTime queueStartStopTime;
+@property (nonatomic, readwrite) AudioFileID recordFile;
+@property (nonatomic, readwrite) SInt64 recordPacket; // current packet number in record file
+@property (nonatomic, readwrite) Boolean running;
+@property (nonatomic, readwrite) Boolean verbose;
+
 @property (readonly) NSMutableData *pcmData;
-@property (readonly) NSMutableData *lameData;
-@property (assign) id delegate;
+@property (weak, readonly) NSMutableData *lameData;
+@property (weak) id delegate;
+
+- (instancetype)init;
+- (instancetype)initWithRecordingFormat:(AudioStreamBasicDescription *)recordingFormatRef;
+
+- (void)start;
+- (void)stop;
+
+- (void)writeTagsFid:(FILE *)fid;
+
 @end

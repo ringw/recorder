@@ -10,15 +10,15 @@
 #import "Recorder.h"
 
 @interface AudioDocument : NSDocument {
-    AudioView *audioView;
-    NSButton *recordButton;
-    Recorder *recorder;
-    BOOL recording;
+	AudioView *audioView;
+	NSButton *recordButton;
+	Recorder *recorder;
+	BOOL recording;
 }
-@property (retain) IBOutlet AudioView *audioView;
-@property (retain) IBOutlet NSButton *recordButton;
+@property (strong) IBOutlet AudioView *audioView;
+@property (strong) IBOutlet NSButton *recordButton;
 - (IBAction)recordClicked:(id)sender;
 - (void)recordedPcmSamples:(void *)samples count:(long)count
-                     start:(double)start
-                       end:(double)end;
+					 start:(double)start
+					   end:(double)end;
 @end

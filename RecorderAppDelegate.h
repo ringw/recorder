@@ -11,12 +11,12 @@
 //#import "Recorder.h"
 
 @interface RecorderAppDelegate : NSObject <NSApplicationDelegate> {
-    NSWindow *window;
-    //AudioView *audioView;
-    //Recorder *rec;
+	NSWindow *__weak window;
+	//AudioView *audioView;
+	//Recorder *rec;
 }
 
-@property (assign) IBOutlet NSWindow *window;
+@property (weak) IBOutlet NSWindow *window;
 //@property (retain) IBOutlet AudioView *audioView;
 
 @end
