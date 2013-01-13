@@ -10,17 +10,17 @@
 #import <AudioToolbox/AudioToolbox.h>
 
 @interface Recorder : NSObject {
-    //MTCoreAudioDevice *inputDevice;
+	//MTCoreAudioDevice *inputDevice;
 	
-    lame_global_flags *			lame_flags;
+	lame_global_flags *			lame_flags;
 	
-    //int STOP;
-    //ALCdevice *device;
-    /*AVCaptureSession *session;
-    AVCaptureAudioDataOutput *dataout;
-    AVCaptureAudioPreviewOutput *prevout;
-    AVCaptureDevice *device;*/
-    //AudioQueueRef aq;
+	//int STOP;
+	//ALCdevice *device;
+	/*AVCaptureSession *session;
+	AVCaptureAudioDataOutput *dataout;
+	AVCaptureAudioPreviewOutput *prevout;
+	AVCaptureDevice *device;*/
+	//AudioQueueRef aq;
 }
 
 @property (nonatomic, readonly) AudioStreamBasicDescription recordingFormat;
